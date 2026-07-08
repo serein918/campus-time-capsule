@@ -4,7 +4,7 @@ import router from '@/router'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: 'https://campus-time-capsule.onrender.com',
   timeout: 10000
 })
 

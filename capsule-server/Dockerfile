@@ -12,11 +12,17 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# ==========================================
 # 第二阶段：轻量级 JRE 运行环境（使用 JRE 21）
-# ==========================================
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+
+# 复制 Aiven 的 SSL 证书 (确保 ca.pem 在 capsule-server 目录下，或根据您的项目结构调整路径)
+# 因为原始 ca.pem 在项目根目录，如果 Docker 构建上下文是 capsule-server，需要将 ca.pem 移到 capsule-server 目录下
+COPY ca.pem /app/ca.pem
+
+# 将证书导入 Java 信任库
+RUN keytool -importcert -alias aiven-mysql-ca -file /app/ca.pem \
+    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
 
 # 从构建阶段复制生成的 jar 包
 COPY --from=build /app/target/capsule-server-1.0.0.jar app.jar

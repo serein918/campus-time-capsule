@@ -1,0 +1,17 @@
+```
+# Java
+capsule-server/target/
+*.class
+*.jar
+*.log
+
+# Node
+capsule-web/node_modules/
+capsule-web/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+```

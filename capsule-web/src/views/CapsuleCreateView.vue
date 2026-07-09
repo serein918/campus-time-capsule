@@ -15,7 +15,8 @@ const form = ref({
   content: '',
   categoryId: null,
   visibility: 'PRIVATE',
-  openTime: ''
+  openTime: '',
+  isAnonymous: 0
 })
 
 onMounted(async () => {
@@ -36,7 +37,6 @@ async function handleSubmit() {
     ElMessage.success('时光胶囊创建成功！')
     router.push('/my-capsules')
   } catch (e) {
-    // 错误已在拦截器处理
   } finally {
     loading.value = false
   }
@@ -68,6 +68,13 @@ async function handleSubmit() {
           <el-radio value="PRIVATE">私密（仅自己可见）</el-radio>
           <el-radio value="PUBLIC">公开（到期后所有人可见）</el-radio>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="发布身份" v-if="form.visibility === 'PUBLIC'">
+        <el-radio-group v-model="form.isAnonymous">
+          <el-radio :value="0">实名发布</el-radio>
+          <el-radio :value="1">匿名发布</el-radio>
+        </el-radio-group>
+        <div style="color: #999; font-size: 12px; margin-top: 4px;">匿名发布后，其他用户将无法看到你的身份信息</div>
       </el-form-item>
       <el-form-item label="解封时间">
         <el-date-picker v-model="form.openTime" type="datetime" placeholder="选择解封开启时间" value-format="YYYY-MM-DD HH:mm:ss" style="width: 100%;" />

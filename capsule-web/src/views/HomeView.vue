@@ -55,9 +55,14 @@ onMounted(async () => {
           <el-card shadow="hover" style="margin-bottom: 16px; cursor: pointer;" @click="router.push(`/capsule/detail/${capsule.id}`)">
             <h4 style="margin-bottom: 8px;">{{ capsule.title }}</h4>
             <p style="color: #666; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ capsule.summary || '暂无摘要' }}</p>
-            <div style="display: flex; justify-content: space-between; margin-top: 12px; color: #999; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 8px;">
+              <el-avatar :size="24" :src="capsule.ownerAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+              <span style="font-size: 13px; color: #555;">{{ capsule.ownerNickname || '匿名用户' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 8px; color: #999; font-size: 12px;">
               <span>浏览 {{ capsule.viewCount }}</span>
               <span>点赞 {{ capsule.likeCount }}</span>
+              <span>收藏 {{ capsule.favoriteCount }}</span>
             </div>
           </el-card>
         </el-col>

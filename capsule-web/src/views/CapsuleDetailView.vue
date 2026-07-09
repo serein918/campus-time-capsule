@@ -39,19 +39,6 @@ onMounted(async () => {
     comments.value = commentRes.data.records || []
   } catch (e) {}
 
-  // 删除评论动作
-  async function handleDeleteComment(commentId) {
-  try {
-    await deleteComment(commentId)
-    ElMessage.success('评论已删除')
-
-    // 重新加载评论列表
-    const commentRes = await getComments(capsuleId, { page: 1, size: 50 })
-    comments.value = commentRes.data.records || []
-  } catch (e) {
-    // 错误已由拦截器捕获
-  }
-}
   // 加载点赞和收藏状态
   if (userStore.isLoggedIn) {
     try {
@@ -64,6 +51,28 @@ onMounted(async () => {
     } catch (e) {}
   }
 })
+
+// 删除评论
+async function handleDeleteComment(commentId) {
+  try {
+    await deleteComment(commentId)
+    ElMessage.success('评论已删除')
+
+    const commentRes = await getComments(capsuleId, {
+      page: 1,
+      size: 50
+    })
+    comments.value = commentRes.data.records || []
+  } catch (e) {
+    // 已由拦截器处理
+  }
+}
+
+// 取消回复
+function cancelReply() {
+  parentId.value = null
+  placeholderText.value = '写下你的评论...'
+}
 
 async function handleLike() {
   if (!userStore.isLoggedIn) {
@@ -162,7 +171,13 @@ async function handleComment() {
     <el-input v-model="commentContent" type="textarea" :rows="3" :placeholder="placeholderText" />
     <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
       <el-button type="primary" @click="handleComment">发表评论</el-button>
-      <el-button v-if="parentId" size="small" @click="() => { parentId = null; placeholderText = '写下你的评论...' }">取消回复</el-button>
+      <el-button
+  v-if="parentId"
+  size="small"
+  @click="cancelReply"
+>
+  取消回复
+</el-button>
     </div>
   </div>
   <el-divider />
@@ -184,18 +199,19 @@ async function handleComment() {
       <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
       <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
       
-      <span 
-        v-if="userStore.isLoggedIn && (
-          (userStore.user && comment.userId === userStore.user.id) || 
-          (userStore.userInfo && comment.userId === userStore.userInfo.id) ||
-          (comment.userId === userStore.userId) ||
-          (comment.userId === userStore.id)
-        )" 
-        @click="handleDeleteComment(comment.id)" 
-        style="color: #F56C6C; font-size: 12px; cursor: pointer; user-select: none;"
-      >
-        删除
-      </span>
+      <span
+  v-if="
+    userStore.isLoggedIn &&
+    (
+      comment.userId === userStore.userInfo.userId ||
+      userStore.isAdmin
+    )
+  "
+  @click="handleDeleteComment(comment.id)"
+  style="color:#F56C6C;font-size:12px;cursor:pointer;user-select:none;"
+>
+  删除
+</span>
     </div>
   </div>
   

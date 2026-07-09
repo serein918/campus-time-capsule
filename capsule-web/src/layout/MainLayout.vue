@@ -1,10 +1,18 @@
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
+const BASE_URL = 'https://campus-time-capsule.onrender.com'
 const router = useRouter()
 const userStore = useUserStore()
+
+const navAvatarUrl = computed(() => {
+  const avatar = userStore.userInfo.avatar
+  if (!avatar) return 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+  return avatar.startsWith('http') ? avatar : BASE_URL + avatar
+})
 
 function handleLogout() {
   userStore.logout()
@@ -34,7 +42,7 @@ function handleLogout() {
         <template v-if="userStore.isLoggedIn">
           <el-dropdown>
             <span style="cursor: pointer; color: #606266; display: flex; align-items: center; gap: 8px;">
-              <el-avatar :size="32" :src="userStore.userInfo.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+              <el-avatar :size="32" :src="navAvatarUrl" />
               {{ userStore.userInfo.nickname || '用户' }}
               <el-icon><arrow-down /></el-icon>
             </span>

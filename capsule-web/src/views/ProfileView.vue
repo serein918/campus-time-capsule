@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getUserInfo, updateUserInfo, updatePassword } from '@/api/user'
 import { uploadFile } from '@/api/common'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
+const BASE_URL = 'https://campus-time-capsule.onrender.com'
 const userStore = useUserStore()
 const userForm = ref({
   nickname: '',
@@ -18,6 +19,13 @@ const passwordForm = ref({
   confirmPassword: ''
 })
 const activeTab = ref('info')
+
+// 计算完整头像URL用于展示
+const fullAvatarUrl = computed(() => {
+  const avatar = userForm.value.avatar
+  if (!avatar) return 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+  return avatar.startsWith('http') ? avatar : BASE_URL + avatar
+})
 
 onMounted(async () => {
   try {
@@ -37,7 +45,7 @@ async function handleAvatarUpload(uploadEvent) {
   try {
     const res = await uploadFile(file)
     userForm.value.avatar = res.data
-    ElMessage.success('头像上传成功')
+    ElMessage.success('头像上传成功，请点击保存修改')
   } catch (e) {
     ElMessage.error('头像上传失败')
   }
@@ -82,7 +90,7 @@ async function handleUpdatePassword() {
         <el-form :model="userForm" label-width="100px" style="max-width: 500px;">
           <el-form-item label="头像">
             <div style="display: flex; align-items: center; gap: 16px;">
-              <el-avatar :size="64" :src="userForm.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+              <el-avatar :size="64" :src="fullAvatarUrl" />
               <el-upload
                 :show-file-list="false"
                 :http-request="handleAvatarUpload"

@@ -200,17 +200,17 @@ async function handleComment() {
       <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
       
       <span
-  v-if="
-    userStore.isLoggedIn &&
-    (
-      comment.userId === userStore.userInfo.userId ||
-      userStore.isAdmin
-    )
-  "
-  @click="handleDeleteComment(comment.id)"
-  style="color:#F56C6C;font-size:12px;cursor:pointer;user-select:none;"
+    v-if="
+        userStore.isLoggedIn &&
+        (
+            comment.userId === userStore.userInfo.userId ||
+            userStore.isAdmin
+        )
+    "
+    @click="handleDeleteComment(comment.id)"
+    style="color:#F56C6C;font-size:12px;cursor:pointer;"
 >
-  删除
+    删除
 </span>
     </div>
   </div>

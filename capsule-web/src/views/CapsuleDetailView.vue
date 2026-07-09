@@ -8,14 +8,6 @@ import { toggleFavorite, getFavoriteStatus } from '@/api/interaction'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
-const BASE_URL = 'https://campus-time-capsule.onrender.com'
-const DEFAULT_AVATAR = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
-
-function getAvatarUrl(avatar) {
-  if (!avatar) return DEFAULT_AVATAR
-  return avatar.startsWith('http') ? avatar : BASE_URL + avatar
-}
-
 const route = useRoute()
 const userStore = useUserStore()
 const capsule = ref(null)
@@ -44,6 +36,7 @@ onMounted(async () => {
     comments.value = commentRes.data.records || []
   } catch (e) {}
 
+  // 加载点赞和收藏状态
   if (userStore.isLoggedIn) {
     try {
       const likeRes = await getLikeStatus(capsuleId)
@@ -134,7 +127,7 @@ async function handleComment() {
       <h2 style="margin-bottom: 16px;">{{ capsule.title }}</h2>
       <!-- 发布者信息 -->
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-        <el-avatar :size="36" :src="getAvatarUrl(capsule.ownerAvatar)" />
+        <el-avatar :size="36" :src="capsule.ownerAvatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
         <div>
           <div style="font-size: 14px; font-weight: 500; color: #333;">{{ capsule.ownerNickname || '匿名用户' }}</div>
           <div style="font-size: 12px; color: #999;">{{ capsule.createTime }}</div>
@@ -175,7 +168,7 @@ async function handleComment() {
 
       <div v-for="comment in comments" :key="comment.id" style="padding: 14px 0; border-bottom: 1px solid #f0f0f0;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-          <el-avatar :size="28" :src="getAvatarUrl(comment.avatar)" />
+          <el-avatar :size="28" :src="comment.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
           <span style="font-weight: bold; font-size: 14px; color: #333;">{{ comment.nickname || '神秘用户' }}</span>
         </div>
 

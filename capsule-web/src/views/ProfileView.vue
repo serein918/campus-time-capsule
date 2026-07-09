@@ -1,14 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getUserInfo, updateUserInfo, updatePassword } from '@/api/user'
+import { uploadFile } from '@/api/common'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 
+const BASE_URL = 'https://campus-time-capsule.onrender.com'
 const userStore = useUserStore()
 const userForm = ref({
   nickname: '',
   email: '',
-  phone: ''
+  phone: '',
+  avatar: ''
 })
 const passwordForm = ref({
   oldPassword: '',
@@ -17,21 +20,42 @@ const passwordForm = ref({
 })
 const activeTab = ref('info')
 
+// 计算完整头像URL用于展示
+const fullAvatarUrl = computed(() => {
+  const avatar = userForm.value.avatar
+  if (!avatar) return 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+  return avatar.startsWith('http') ? avatar : BASE_URL + avatar
+})
+
 onMounted(async () => {
   try {
     const res = await getUserInfo()
     userForm.value = {
       nickname: res.data.nickname || '',
       email: res.data.email || '',
-      phone: res.data.phone || ''
+      phone: res.data.phone || '',
+      avatar: res.data.avatar || ''
     }
   } catch (e) {}
 })
+
+// 头像上传
+async function handleAvatarUpload(uploadEvent) {
+  const file = uploadEvent.file
+  try {
+    const res = await uploadFile(file)
+    userForm.value.avatar = res.data
+    ElMessage.success('头像上传成功，请点击保存修改')
+  } catch (e) {
+    ElMessage.error('头像上传失败')
+  }
+}
 
 async function handleUpdateInfo() {
   try {
     await updateUserInfo(userForm.value)
     userStore.updateNickname(userForm.value.nickname)
+    userStore.updateAvatar(userForm.value.avatar)
     ElMessage.success('个人信息修改成功')
   } catch (e) {}
 }
@@ -64,6 +88,18 @@ async function handleUpdatePassword() {
     <el-tabs v-model="activeTab">
       <el-tab-pane label="基本信息" name="info">
         <el-form :model="userForm" label-width="100px" style="max-width: 500px;">
+          <el-form-item label="头像">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <el-avatar :size="64" :src="fullAvatarUrl" />
+              <el-upload
+                :show-file-list="false"
+                :http-request="handleAvatarUpload"
+                accept="image/*"
+              >
+                <el-button size="small" type="primary">更换头像</el-button>
+              </el-upload>
+            </div>
+          </el-form-item>
           <el-form-item label="昵称">
             <el-input v-model="userForm.nickname" placeholder="请输入昵称" />
           </el-form-item>

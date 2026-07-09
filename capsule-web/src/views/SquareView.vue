@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { getSquareCapsules } from '@/api/capsule'
 import { getCategoryList } from '@/api/common'
 
+const BASE_URL = 'https://campus-time-capsule.onrender.com'
+const DEFAULT_AVATAR = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 const router = useRouter()
 const capsules = ref([])
 const categories = ref([])
@@ -11,6 +13,11 @@ const currentPage = ref(1)
 const total = ref(0)
 const keyword = ref('')
 const categoryId = ref(null)
+
+function getAvatarUrl(avatar) {
+  if (!avatar) return DEFAULT_AVATAR
+  return avatar.startsWith('http') ? avatar : BASE_URL + avatar
+}
 
 async function loadData() {
   try {
@@ -71,7 +78,11 @@ function handlePageChange(page) {
         <el-card shadow="hover" style="margin-bottom: 16px; cursor: pointer;" @click="router.push(`/capsule/detail/${capsule.id}`)">
           <h4 style="margin-bottom: 8px;">{{ capsule.title }}</h4>
           <p style="color: #666; font-size: 14px; height: 40px; overflow: hidden;">{{ capsule.summary || '暂无摘要' }}</p>
-          <div style="display: flex; justify-content: space-between; margin-top: 12px; color: #999; font-size: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 8px;">
+            <el-avatar :size="24" :src="getAvatarUrl(capsule.ownerAvatar)" />
+            <span style="font-size: 13px; color: #555;">{{ capsule.ownerNickname || '匿名用户' }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; color: #999; font-size: 12px;">
             <span>浏览 {{ capsule.viewCount }}</span>
             <span>点赞 {{ capsule.likeCount }}</span>
             <span>收藏 {{ capsule.favoriteCount }}</span>

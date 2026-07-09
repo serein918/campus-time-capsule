@@ -12,9 +12,61 @@ import com.capsule.service.CapsuleService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
+import com.capsule.utils.BaiduCensorUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class CapsuleServiceImpl extends ServiceImpl<CapsuleMapper, Capsule> implements CapsuleService {
+
+    // 注入百度AI内容安全审核工具类
+    @Autowired
+    private BaiduCensorUtil baiduCensorUtil;
+
+    /**
+     * 重写 MyBatis-Plus 自带的 save(T entity) 方法
+     * 在用户“创建胶囊”进入数据库前强制进行安全审核
+     */
+    @Override
+    public boolean save(Capsule entity) {
+        if (entity != null) {
+            // 审核标题
+            if (!baiduCensorUtil.checkText(entity.getTitle())) {
+                throw new BusinessException("投递失败：胶囊标题包含不合规或违规词汇，请修改后重试！");
+            }
+            // 审核摘要
+            if (!baiduCensorUtil.checkText(entity.getSummary())) {
+                throw new BusinessException("投递失败：胶囊摘要包含不合规或违规词汇，请修改后重试！");
+            }
+            // 审核正文内容
+            if (!baiduCensorUtil.checkText(entity.getContent())) {
+                throw new BusinessException("投递失败：胶囊正文包含不合规或违规词汇，请修改后重试！");
+            }
+        }
+        return super.save(entity); // 审核通过，执行原有的保存逻辑
+    }
+
+    /**
+     * 重写 MyBatis-Plus 自带的 updateById(T entity) 方法
+     * 防止用户在“修改胶囊”时填入违规内容
+     */
+    @Override
+    public boolean updateById(Capsule entity) {
+        if (entity != null) {
+            // 如果用户修改了标题，则进行审核
+            if (entity.getTitle() != null && !baiduCensorUtil.checkText(entity.getTitle())) {
+                throw new BusinessException("修改失败：修改后的标题包含不合规或违规词汇！");
+            }
+            // 如果用户修改了摘要，则进行审核
+            if (entity.getSummary() != null && !baiduCensorUtil.checkText(entity.getSummary())) {
+                throw new BusinessException("修改失败：修改后的摘要包含不合规或违规词汇！");
+            }
+            // 如果用户修改了正文，则进行审核
+            if (entity.getContent() != null && !baiduCensorUtil.checkText(entity.getContent())) {
+                throw new BusinessException("修改失败：修改后的正文包含不合规或违规词汇！");
+            }
+        }
+        return super.updateById(entity); // 审核通过，执行原有的更新逻辑
+    }
 
     @Override
     public Capsule getSecureCapsuleDetail(Long id) {

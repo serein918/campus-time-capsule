@@ -34,3 +34,11 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+
+# 百度AI配置
+baidu:
+  aip:
+    appId: ${BAIDU_APP_ID:fake_app_id}
+    apiKey: ${BAIDU_API_KEY:fake_api_key}
+    secretKey: ${BAIDU_SECRET_KEY:fake_secret_key}

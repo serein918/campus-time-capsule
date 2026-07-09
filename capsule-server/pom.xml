@@ -95,6 +95,13 @@
             <version>2.18.0</version>
         </dependency>
 
+        <!-- 百度AI -->
+        <dependency>
+            <groupId>com.baidu.aip</groupId>
+            <artifactId>java-sdk</artifactId>
+            <version>4.16.16</version>
+        </dependency>
+
         <!-- test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

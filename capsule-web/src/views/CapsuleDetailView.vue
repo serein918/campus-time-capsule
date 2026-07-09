@@ -153,48 +153,53 @@ async function handleComment() {
       </div>
     </el-card>
 
-    <el-card style="margin-top: 20px;">
-      <template #header>
-        <span style="font-weight: bold;">评论区 ({{ comments.length }})</span>
-      </template>
-      <div style="margin-bottom: 20px;">
-        <el-input v-model="commentContent" type="textarea" :rows="3" :placeholder="placeholderText" />
-        <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
-          <el-button type="primary" @click="handleComment">发表评论</el-button>
-          <el-button v-if="parentId" size="small" @click="() => { parentId = null; placeholderText = '写下你的评论...' }">取消回复</el-button>
-        </div>
-      </div>
-      <el-divider />
-      
-      <div v-for="comment in comments" :key="comment.id" style="padding: 14px 0; border-bottom: 1px solid #f0f0f0;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-          <el-avatar :size="28" :src="comment.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
-          <span style="font-weight: bold; font-size: 14px; color: #333;">{{ comment.nickname || '神秘用户' }}</span>
-        </div>
-        
-        <p style="margin-left: 36px; color: #353535; font-size: 14px; line-height: 1.6;">
-          <span v-if="comment.parentNickname" style="color: #409EFF; font-weight: 500; margin-right: 4px;">
-            回复 @{{ comment.parentNickname }}：
-          </span>
-          {{ comment.content }}
-        </p>
-        
-        <div style="margin-left: 36px; margin-top: 6px; display: flex; align-items: center; gap: 16px;">
-  <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
+<el-card style="margin-top: 20px;">
+  <template #header>
+    <span style="font-weight: bold;">评论区 ({{ comments.length }})</span>
+  </template>
   
-  <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
+  <div style="margin-bottom: 20px;">
+    <el-input v-model="commentContent" type="textarea" :rows="3" :placeholder="placeholderText" />
+    <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+      <el-button type="primary" @click="handleComment">发表评论</el-button>
+      <el-button v-if="parentId" size="small" @click="() => { parentId = null; placeholderText = '写下你的评论...' }">取消回复</el-button>
+    </div>
+  </div>
+  <el-divider />
   
-  <span 
-    v-if="userStore.userInfo && comment.userId === userStore.userInfo.id" 
-    @click="handleDeleteComment(comment.id)" 
-    style="color: #F56C6C; font-size: 12px; cursor: pointer; user-select: none;"
-  >
-    删除
-  </span>
-</div>
-      </div>
+  <div v-for="comment in comments" :key="comment.id" style="padding: 14px 0; border-bottom: 1px solid #f0f0f0;">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <el-avatar :size="28" :src="comment.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+      <span style="font-weight: bold; font-size: 14px; color: #333;">{{ comment.nickname || '神秘用户' }}</span>
+    </div>
+    
+    <p style="margin-left: 36px; color: #353535; font-size: 14px; line-height: 1.6;">
+      <span v-if="comment.parentNickname" style="color: #409EFF; font-weight: 500; margin-right: 4px;">
+        回复 @{{ comment.parentNickname }}：
+      </span>
+      {{ comment.content }}
+    </p>
+
+    <div style="margin-left: 36px; margin-top: 6px; display: flex; align-items: center; gap: 16px;">
+      <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
+      <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
       
-      <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧" />
-    </el-card>
+      <span 
+        v-if="userStore.isLoggedIn && (
+          (userStore.user && comment.userId === userStore.user.id) || 
+          (userStore.userInfo && comment.userId === userStore.userInfo.id) ||
+          (comment.userId === userStore.userId) ||
+          (comment.userId === userStore.id)
+        )" 
+        @click="handleDeleteComment(comment.id)" 
+        style="color: #F56C6C; font-size: 12px; cursor: pointer; user-select: none;"
+      >
+        删除
+      </span>
+    </div>
+  </div>
+  
+  <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧" />
+</el-card>
   </div>
 </template>

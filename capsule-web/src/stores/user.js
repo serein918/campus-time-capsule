@@ -32,10 +32,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
   }
 
-  function updateAvatar(avatar) {
-    userInfo.value.avatar = avatar
-    localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
-  }
-
-  return { token, userInfo, isLoggedIn, isAdmin, setLoginInfo, logout, updateNickname, updateAvatar }
+  return { token, userInfo, isLoggedIn, isAdmin, setLoginInfo, logout, updateNickname }
 })

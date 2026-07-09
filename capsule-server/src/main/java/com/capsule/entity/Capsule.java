@@ -22,7 +22,7 @@ public class Capsule {
     private Long categoryId;
     private String visibility;
     private Integer status;
-    private Integer isAnonymous;
+    private Integer isAnonymous; 
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime openTime;
@@ -34,11 +34,4 @@ public class Capsule {
     private LocalDateTime createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-
-    // 非表字段，用于展示发布者信息
-    @TableField(exist = false)
-    private String ownerNickname;
-
-    @TableField(exist = false)
-    private String ownerAvatar;
 }

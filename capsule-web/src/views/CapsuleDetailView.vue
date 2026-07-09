@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getCapsuleDetail } from '@/api/capsule'
-import { getComments, addComment } from '@/api/comment'
+import { getComments, addComment, deleteComment } from '@/api/comment' 
 import { toggleLike, getLikeStatus } from '@/api/interaction'
 import { toggleFavorite, getFavoriteStatus } from '@/api/interaction'
 import { useUserStore } from '@/stores/user'
@@ -39,6 +39,19 @@ onMounted(async () => {
     comments.value = commentRes.data.records || []
   } catch (e) {}
 
+  // 删除评论动作
+  async function handleDeleteComment(commentId) {
+  try {
+    await deleteComment(commentId)
+    ElMessage.success('评论已删除')
+
+    // 重新加载评论列表
+    const commentRes = await getComments(capsuleId, { page: 1, size: 50 })
+    comments.value = commentRes.data.records || []
+  } catch (e) {
+    // 错误已由拦截器捕获
+  }
+}
   // 加载点赞和收藏状态
   if (userStore.isLoggedIn) {
     try {
@@ -81,10 +94,10 @@ async function handleFavorite() {
   } catch (e) {}
 }
 
-// 💡点击评论旁的“回复”按钮时触发
+// 💡 当点击评论旁的“回复”按钮时触发
 function clickReply(comment) {
   parentId.value = comment.id 
-  placeholderText.value = `回复 @${comment.nickname || '用户'}：` // 动态修改输入框提示
+  placeholderText.value = `回复 @${comment.nickname || '用户'}：` 
 }
 
 async function handleComment() {
@@ -167,9 +180,18 @@ async function handleComment() {
         </p>
         
         <div style="margin-left: 36px; margin-top: 6px; display: flex; align-items: center; gap: 16px;">
-          <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
-          <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
-        </div>
+  <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
+  
+  <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
+  
+  <span 
+    v-if="userStore.userInfo && comment.userId === userStore.userInfo.id" 
+    @click="handleDeleteComment(comment.id)" 
+    style="color: #F56C6C; font-size: 12px; cursor: pointer; user-select: none;"
+  >
+    删除
+  </span>
+</div>
       </div>
       
       <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧" />

@@ -17,6 +17,10 @@ const liked = ref(false)
 const favorited = ref(false)
 const loading = ref(true)
 
+// 💡 记录父评论ID与动态提示文本
+const parentId = ref(null)
+const placeholderText = ref('写下你的评论...')
+
 const capsuleId = route.params.id
 
 onMounted(async () => {
@@ -77,6 +81,12 @@ async function handleFavorite() {
   } catch (e) {}
 }
 
+// 💡点击评论旁的“回复”按钮时触发
+function clickReply(comment) {
+  parentId.value = comment.id 
+  placeholderText.value = `回复 @${comment.nickname || '用户'}：` // 动态修改输入框提示
+}
+
 async function handleComment() {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录')
@@ -87,9 +97,18 @@ async function handleComment() {
     return
   }
   try {
-    await addComment({ capsuleId: Number(capsuleId), content: commentContent.value })
+    await addComment({ 
+      capsuleId: Number(capsuleId), 
+      content: commentContent.value,
+      parentId: parentId.value 
+    })
     ElMessage.success('评论成功')
+    
+    // 💡 发表成功后，重置所有的状态
     commentContent.value = ''
+    parentId.value = null
+    placeholderText.value = '写下你的评论...'
+    
     // 重新加载评论
     const commentRes = await getComments(capsuleId, { page: 1, size: 50 })
     comments.value = commentRes.data.records || []
@@ -121,20 +140,38 @@ async function handleComment() {
       </div>
     </el-card>
 
-    <!-- 评论区 -->
     <el-card style="margin-top: 20px;">
       <template #header>
         <span style="font-weight: bold;">评论区 ({{ comments.length }})</span>
       </template>
       <div style="margin-bottom: 20px;">
-        <el-input v-model="commentContent" type="textarea" :rows="3" placeholder="写下你的评论..." />
-        <el-button type="primary" style="margin-top: 10px;" @click="handleComment">发表评论</el-button>
+        <el-input v-model="commentContent" type="textarea" :rows="3" :placeholder="placeholderText" />
+        <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+          <el-button type="primary" @click="handleComment">发表评论</el-button>
+          <el-button v-if="parentId" size="small" @click="() => { parentId = null; placeholderText = '写下你的评论...' }">取消回复</el-button>
+        </div>
       </div>
       <el-divider />
-      <div v-for="comment in comments" :key="comment.id" style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-        <p>{{ comment.content }}</p>
-        <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
+      
+      <div v-for="comment in comments" :key="comment.id" style="padding: 14px 0; border-bottom: 1px solid #f0f0f0;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <el-avatar :size="28" :src="comment.avatar || 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
+          <span style="font-weight: bold; font-size: 14px; color: #333;">{{ comment.nickname || '神秘用户' }}</span>
+        </div>
+        
+        <p style="margin-left: 36px; color: #353535; font-size: 14px; line-height: 1.6;">
+          <span v-if="comment.parentNickname" style="color: #409EFF; font-weight: 500; margin-right: 4px;">
+            回复 @{{ comment.parentNickname }}：
+          </span>
+          {{ comment.content }}
+        </p>
+        
+        <div style="margin-left: 36px; margin-top: 6px; display: flex; align-items: center; gap: 16px;">
+          <span style="color: #999; font-size: 12px;">{{ comment.createTime }}</span>
+          <span @click="clickReply(comment)" style="color: #409EFF; font-size: 12px; cursor: pointer; user-select: none;">回复</span>
+        </div>
       </div>
+      
       <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发吧" />
     </el-card>
   </div>

@@ -40,6 +40,12 @@ const router = createRouter({
           component: () => import('@/views/CapsuleDetailView.vue')
         },
         {
+          path: 'capsule/edit/:id',
+          name: 'capsuleEdit',
+          component: () => import('@/views/CapsuleEditView.vue'),
+          meta: { requireAuth: true }
+        },
+        {
           path: 'my-capsules',
           name: 'myCapsules',
           component: () => import('@/views/MyCapsulesView.vue'),

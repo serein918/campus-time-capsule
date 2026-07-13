@@ -58,9 +58,10 @@ function handlePageChange(page) {
       <el-table-column prop="viewCount" label="浏览" width="80" />
       <el-table-column prop="likeCount" label="点赞" width="80" />
       <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="250" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" link @click="router.push(`/capsule/detail/${row.id}`)">查看</el-button>
+          <el-button type="warning" link @click="router.push(`/capsule/edit/${row.id}`)">编辑</el-button>
           <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
         </template>
       </el-table-column>
